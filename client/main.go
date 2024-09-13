@@ -12,7 +12,7 @@ func main() {
 	}
 
 	defer conn.Close()
-	msg := []byte{0, 0, 0, 0}
+	msg := []byte{0, 0, 0, 23, 0, 12, 0, 4, 0, 0, 0, 7}
 	_, err = conn.Write(msg)
 	if err != nil {
 		fmt.Printf("Error writing: %s\n", err.Error())

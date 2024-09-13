@@ -5,7 +5,9 @@ import "encoding/binary"
 type Request struct {
 	bytes           []byte
 	byteParseOffset uint
-	Header          *RequestHeader
+
+	Length int32
+	Header *RequestHeader
 }
 
 func NewRequest(bytes []byte) *Request {
@@ -13,6 +15,8 @@ func NewRequest(bytes []byte) *Request {
 		bytes:           bytes,
 		byteParseOffset: 0,
 	}
+
+	req.Length = req.ReadInt32()
 	req.Header = ParseRequestHeader(&req)
 
 	return &req
