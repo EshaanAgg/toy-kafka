@@ -19,3 +19,7 @@ func ParseRequestHeader(r *Request) *RequestHeader {
 		ClientID:      nil,
 	}
 }
+
+func (h *RequestHeader) ValidateAPIVersion() bool {
+	return h.APIVersion >= 0 && h.APIVersion <= 4
+}

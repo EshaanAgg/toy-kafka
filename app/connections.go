@@ -8,6 +8,8 @@ import (
 	"github.com/codecrafters-io/redis-starter-go/app/protocol"
 )
 
+const UNSUPPORTED_VERSION_ERROR_CODE = 35
+
 func handleConnection(conn net.Conn) {
 	defer conn.Close()
 
@@ -25,8 +27,10 @@ func handleConnection(conn net.Conn) {
 		req := protocol.NewRequest(buf)
 
 		res := protocol.NewResponse()
-		res.WriteInt32(0)
 		res.WriteInt32(req.Header.CorrelationID)
+		if !req.Header.ValidateAPIVersion() {
+			res.WriteInt16(UNSUPPORTED_VERSION_ERROR_CODE)
+		}
 		res.Send(&conn)
 	}
 }
