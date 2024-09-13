@@ -38,9 +38,16 @@ func (b *APIVersionBody) Encode(r *Response) {
 
 var API_VERSION_LIST = []APIVersionListItem{
 	{
+		// API Versions API
 		APIVersion: 18,
 		MinVersion: 0,
 		MaxVersion: 4,
+	},
+	{
+		// Fetch API
+		APIVersion: 1,
+		MinVersion: 0,
+		MaxVersion: 16,
 	},
 }
 
