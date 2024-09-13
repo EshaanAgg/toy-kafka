@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"net"
+
+	"github.com/codecrafters-io/redis-starter-go/app/protocol"
 )
 
 func handleConnection(conn net.Conn) {
@@ -20,10 +22,11 @@ func handleConnection(conn net.Conn) {
 			fmt.Printf("Error reading: %s\n", err.Error())
 		}
 
-		resp := []byte{0x00, 0x01, 0x02, 0x03, 0x00, 0x00, 0x00, 0x07}
-		_, err = conn.Write(resp)
-		if err != nil {
-			fmt.Printf("Error writing: %s\n", err.Error())
-		}
+		req := protocol.NewRequest(buf)
+
+		res := protocol.NewResponse()
+		res.WriteInt32(0)
+		res.WriteInt32(req.Header.CorrelationID)
+		res.Send(&conn)
 	}
 }
