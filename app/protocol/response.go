@@ -28,10 +28,34 @@ func (r *Response) WriteInt32(vals ...int32) {
 	}
 }
 
+func (r *Response) WriteVarInt(vals ...int) {
+	for _, val := range vals {
+		bytes := make([]byte, 0)
+
+		for {
+			toWrite := byte(val & 0x7F)
+			val >>= 7
+			if val != 0 {
+				toWrite |= 0x80
+				bytes = append(bytes, toWrite)
+			} else {
+				bytes = append(bytes, toWrite)
+				break
+			}
+		}
+
+		r.bytes = append(r.bytes, bytes...)
+	}
+}
+
+func (r *Response) WriteBytes(vals ...byte) {
+	r.bytes = append(r.bytes, vals...)
+}
+
 func (r *Response) Send(conn *net.Conn) {
 	msg := make([]byte, 0)
 
-	msgLen := 4 + uint32(len(r.bytes))
+	msgLen := uint32(len(r.bytes))
 	msg = binary.BigEndian.AppendUint32(msg, msgLen)
 	msg = append(msg, r.bytes...)
 
