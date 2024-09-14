@@ -52,6 +52,12 @@ func (r *Response) WriteBytes(vals ...byte) {
 	r.bytes = append(r.bytes, vals...)
 }
 
+func (r *Response) WriteTaggedFields() {
+	// TODO: Implement tagged fields
+	// For now, just write a single byte of 0x00 to indicate no tagged fields
+	r.WriteBytes(0x00)
+}
+
 func (r *Response) Send(conn *net.Conn) {
 	msg := make([]byte, 0)
 
