@@ -12,7 +12,7 @@ func main() {
 		fmt.Println("Failed to bind to port 9092")
 		os.Exit(1)
 	}
-	fmt.Println("Listening on port 9092")
+	fmt.Println("The Kafka broker is now listening on port 9092")
 	defer l.Close()
 
 	for {
@@ -22,6 +22,7 @@ func main() {
 			os.Exit(1)
 		}
 
+		fmt.Println("Accepted connection from: ", conn.RemoteAddr())
 		go handleConnection(conn)
 	}
 }
