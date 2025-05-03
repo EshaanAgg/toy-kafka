@@ -9,8 +9,6 @@ import (
 )
 
 func handleConnection(conn net.Conn) {
-	defer conn.Close()
-
 	for {
 		buf := make([]byte, 1024)
 		_, err := conn.Read(buf)
@@ -27,38 +25,46 @@ func handleConnection(conn net.Conn) {
 			return
 		}
 
-		handleData(conn, buf)
+		// If failed to handle the data recieved from the client, close the connection.
+		// TODO: Handle the errors gracefully and inform the client.
+		if !handleData(conn, buf) {
+			conn.Close()
+			return
+		}
 	}
 }
 
-func handleData(conn net.Conn, data []byte) {
+// Handles the recieved data. Returns true if the data was handled successfully.
+func handleData(conn net.Conn, data []byte) bool {
 	reqHeader, err := request.NewRequestHeader(data)
 	if err != nil {
 		fmt.Printf("Error in parsing request header: %s\n", err.Error())
-		return
+		return false
 	}
 
 	api, ok := request.RequestKeyMap[reqHeader.APIKey]
 	if !ok {
 		fmt.Printf("Unknown request type: %d\n", reqHeader.APIKey)
-		return
+		return false
 	}
 
 	req, err := api.NewFn(reqHeader)
 	if err != nil {
 		fmt.Printf("Error in parsing request body: %s\n", err.Error())
-		return
+		return false
 	}
 
 	res, err := req.Handle()
 	if err != nil {
 		fmt.Printf("Error in handling request: %s\n", err.Error())
-		return
+		return false
 	}
 
 	_, err = conn.Write(res.Bytes())
 	if err != nil {
 		fmt.Printf("Error writing response: %s\n", err.Error())
-		return
+		return false
 	}
+
+	return true
 }

@@ -44,24 +44,30 @@ func (p *Parser) ReadInt64() (int64, error) {
 	return int64(binary.BigEndian.Uint64(b)), nil
 }
 
-func (p *Parser) ReadVarInt() (uint, error) {
-	var result uint
-	var shift uint
-
-	for {
-		if p.idx >= len(p.bytes) {
-			return 0, errors.New("ReadVarInt: not enough bytes")
-		}
-		b := p.bytes[p.idx]
-		p.idx++
-		result |= (uint(b) & 0x7F) << shift
-		if b&0x80 == 0 {
-			break
-		}
-		shift += 7
+func (p *Parser) ReadVarInt() (int64, error) {
+	v, n := binary.Varint(p.bytes[p.idx:])
+	if n == 0 {
+		return 0, fmt.Errorf("ReadVarUInt: not enough bytes to decode varint")
+	}
+	if n < 0 {
+		return 0, fmt.Errorf("ReadVarUInt: varint overflow")
 	}
 
-	return result, nil
+	p.idx += n
+	return v, nil
+}
+
+func (p *Parser) ReadVarUInt() (uint64, error) {
+	v, n := binary.Uvarint(p.bytes[p.idx:])
+	if n == 0 {
+		return 0, fmt.Errorf("ReadVarUInt: not enough bytes to decode varint")
+	}
+	if n < 0 {
+		return 0, fmt.Errorf("ReadVarUInt: varint overflow")
+	}
+
+	p.idx += n
+	return v, nil
 }
 
 func (p *Parser) ReadNullableString() (*string, error) {
@@ -84,17 +90,45 @@ func (p *Parser) ReadNullableString() (*string, error) {
 }
 
 func (p *Parser) ReadCompactString() (string, error) {
-	// The value of N + 1 is encoded as an UNSIGNED variable-length integer
-	n, err := p.ReadVarInt()
+	// The value of N + 1 is encoded as an unsigned variable-length integer
+	n, err := p.ReadVarUInt()
 	if err != nil {
 		return "", fmt.Errorf("ReadCompactString [length]: %w", err)
 	}
-	// Type-cast to int and decrement by 1
-	n = uint(n) - 1
+	if n == 0 {
+		return "", nil
+	}
 
+	n -= 1
 	strBytes := p.getNextBytes(int(n))
 	if strBytes == nil {
 		return "", fmt.Errorf("ReadCompactString [content]: Not enough bytes for length %d", n)
 	}
 	return string(strBytes), nil
+}
+
+func (p *Parser) ReadString() (string, error) {
+	// The value of N + 1 is encoded as an UNSIGNED variable-length integer
+	n, err := p.ReadInt16()
+	if err != nil {
+		return "", fmt.Errorf("ReadString [length]: %w", err)
+	}
+
+	strBytes := p.getNextBytes(int(n))
+	if strBytes == nil {
+		return "", fmt.Errorf("ReadString [content]: Not enough bytes for length %d", n)
+	}
+	return string(strBytes), nil
+}
+
+func (p *Parser) ReadZeroTaggedFieldArray() error {
+	// The array is encoded as an compact array
+	n, err := p.ReadVarUInt()
+	if err != nil {
+		return fmt.Errorf("ReadZeroTaggedFieldArray [length]: %w", err)
+	}
+	if n != 0 {
+		return fmt.Errorf("ReadZeroTaggedFieldArray [length]: expected 0, got %d", n)
+	}
+	return nil
 }

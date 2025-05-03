@@ -22,12 +22,12 @@ type APIVersionV4Request struct {
 func NewAPIVersionV4Request(r *RequestHeader) (Request, error) {
 	clientSoftwareName, err := r.ReadCompactString()
 	if err != nil {
-		return nil, fmt.Errorf("newAPIVersionBody [clientSoftwareName]: %w", err)
+		return nil, fmt.Errorf("newAPIVersionBody.clientSoftwareName: %w", err)
 	}
 
 	clientSoftwareVersion, err := r.ReadCompactString()
 	if err != nil {
-		return nil, fmt.Errorf("newAPIVersionBody [clientSoftwareVersion]: %w", err)
+		return nil, fmt.Errorf("newAPIVersionBody.clientSoftwareVersion: %w", err)
 	}
 
 	return &APIVersionV4Request{

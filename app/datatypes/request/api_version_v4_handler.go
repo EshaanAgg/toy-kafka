@@ -1,6 +1,10 @@
 package request
 
-import "github.com/EshaanAgg/toy-kafka/app/datatypes/response"
+import (
+	"github.com/EshaanAgg/toy-kafka/app/datatypes/response"
+)
+
+const UNSUPPORTED_API_VERSION_ERROR_CODE = 35
 
 // ApiVersions Response (Version: 4) => error_code [api_keys] throttle_time_ms _tagged_fields
 //
@@ -12,13 +16,26 @@ import "github.com/EshaanAgg/toy-kafka/app/datatypes/response"
 //	throttle_time_ms => INT32
 
 func (r *APIVersionV4Request) Handle() (*response.Response, error) {
-	var res response.Response
+	res := response.NewResponse(r.CorrelationID)
 
-	res.WriteInt16(0) // Error code
+	res.WriteInt16(r.getErrorCode()) // Error code
+
+	res.WriteCompactArrayLength(len(RequestKeyMap))
 	for key, api := range RequestKeyMap {
 		res.WriteInt16(key, api.MinVersion, api.MaxVersion)
+		res.WriteEmptyTaggedFields()
 	}
-	res.WriteInt16(0) // Throttle time
 
-	return &res, nil
+	res.WriteInt32(0) // Throttle time
+	res.WriteEmptyTaggedFields()
+
+	return res, nil
+}
+
+func (r *APIVersionV4Request) getErrorCode() int16 {
+	api := RequestKeyMap[r.APIKey]
+	if api.MinVersion > r.APIVersion || api.MaxVersion < r.APIVersion {
+		return UNSUPPORTED_API_VERSION_ERROR_CODE
+	}
+	return 0
 }

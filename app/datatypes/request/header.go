@@ -20,9 +20,6 @@ type RequestHeader struct {
 	ClientID      *string
 }
 
-const MIN_SUPPORTED_API_VERSION = 0
-const MAX_SUPPORTED_API_VERSION = 4
-
 func NewRequestHeader(buf []byte) (*RequestHeader, error) {
 	r := &RequestHeader{
 		Parser: parser.NewParser(buf),
@@ -38,29 +35,29 @@ func NewRequestHeader(buf []byte) (*RequestHeader, error) {
 	if err != nil {
 		return nil, fmt.Errorf("NewRequestHeader [apiKey]: %w", err)
 	}
+	r.APIKey = apiKey
 
 	apiVersion, err := r.ReadInt16()
 	if err != nil {
 		return nil, fmt.Errorf("NewRequestHeader [apiVersion]: %w", err)
 	}
-	if apiVersion < MIN_SUPPORTED_API_VERSION || apiVersion > MAX_SUPPORTED_API_VERSION {
-		return nil, fmt.Errorf("NewRequestHeader [apiVersion]: %w", fmt.Errorf("unsupported api version: %d", apiVersion))
-	}
+	r.APIVersion = apiVersion
 
 	correlationID, err := r.ReadInt32()
 	if err != nil {
 		return nil, fmt.Errorf("NewRequestHeader [correlationID]: %w", err)
 	}
+	r.CorrelationID = correlationID
 
 	clientID, err := r.ReadNullableString()
 	if err != nil {
 		return nil, fmt.Errorf("NewRequestHeader [clientID]: %w", err)
 	}
+	r.ClientID = clientID
 
-	return &RequestHeader{
-		APIKey:        apiKey,
-		APIVersion:    apiVersion,
-		CorrelationID: correlationID,
-		ClientID:      clientID,
-	}, nil
+	if err := r.ReadZeroTaggedFieldArray(); err != nil {
+		return nil, fmt.Errorf("NewRequestHeader [taggedFields]: %w", err)
+	}
+
+	return r, nil
 }

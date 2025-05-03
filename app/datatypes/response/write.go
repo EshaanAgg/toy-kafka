@@ -16,20 +16,23 @@ func (r *Response) WriteInt32(vals ...int32) {
 
 func (r *Response) WriteVarInt(vals ...int) {
 	for _, val := range vals {
-		bytes := make([]byte, 0)
-
-		for {
-			toWrite := byte(val & 0x7F)
-			val >>= 7
-			if val != 0 {
-				toWrite |= 0x80
-				bytes = append(bytes, toWrite)
-			} else {
-				bytes = append(bytes, toWrite)
-				break
-			}
-		}
-
-		r.body = append(r.body, bytes...)
+		r.body = binary.AppendVarint(r.body, int64(val))
 	}
+}
+
+func (r *Response) WriteVarUInt(vals ...uint) {
+	for _, val := range vals {
+		r.body = binary.AppendUvarint(r.body, uint64(val))
+	}
+}
+
+func (r *Response) WriteEmptyTaggedFields() {
+	// Tagged fields are represented by a compact array.
+	// We set the same to be nil to indicate that there are no tagged fields.
+	r.WriteVarUInt(0)
+}
+
+func (r *Response) WriteCompactArrayLength(length int) {
+	// Compact array length is represented by a varint of length + 1.
+	r.WriteVarInt(length + 1)
 }
