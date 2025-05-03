@@ -4,14 +4,14 @@ import (
 	"fmt"
 )
 
-type APIVersionV4Body struct {
+type APIVersionsV4Body struct {
 	ClientSoftwareName    string
 	ClientSoftwareVersion string
 }
 
-type APIVersionV4Request struct {
+type APIVersionsV4Request struct {
 	*RequestHeader
-	Body *APIVersionV4Body
+	Body *APIVersionsV4Body
 }
 
 // ApiVersions Request (Version 4) => client_software_name client_software_version _tagged_fields
@@ -19,7 +19,7 @@ type APIVersionV4Request struct {
 //	client_software_name => COMPACT_STRING
 //	client_software_version => COMPACT_STRING
 
-func NewAPIVersionV4Request(r *RequestHeader) (Request, error) {
+func NewAPIVersionsV4Request(r *RequestHeader) (Request, error) {
 	clientSoftwareName, err := r.ReadCompactString()
 	if err != nil {
 		return nil, fmt.Errorf("newAPIVersionBody.clientSoftwareName: %w", err)
@@ -30,9 +30,9 @@ func NewAPIVersionV4Request(r *RequestHeader) (Request, error) {
 		return nil, fmt.Errorf("newAPIVersionBody.clientSoftwareVersion: %w", err)
 	}
 
-	return &APIVersionV4Request{
+	return &APIVersionsV4Request{
 		RequestHeader: r,
-		Body: &APIVersionV4Body{
+		Body: &APIVersionsV4Body{
 			ClientSoftwareName:    clientSoftwareName,
 			ClientSoftwareVersion: clientSoftwareVersion,
 		},

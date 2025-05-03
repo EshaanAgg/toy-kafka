@@ -15,7 +15,7 @@ const UNSUPPORTED_API_VERSION_ERROR_CODE = 35
 //	  max_version => INT16
 //	throttle_time_ms => INT32
 
-func (r *APIVersionV4Request) Handle() (*response.Response, error) {
+func (r *APIVersionsV4Request) Handle() (*response.Response, error) {
 	res := response.NewResponse(r.CorrelationID)
 
 	res.WriteInt16(r.getErrorCode()) // Error code
@@ -32,7 +32,7 @@ func (r *APIVersionV4Request) Handle() (*response.Response, error) {
 	return res, nil
 }
 
-func (r *APIVersionV4Request) getErrorCode() int16 {
+func (r *APIVersionsV4Request) getErrorCode() int16 {
 	api := RequestKeyMap[r.APIKey]
 	if api.MinVersion > r.APIVersion || api.MaxVersion < r.APIVersion {
 		return UNSUPPORTED_API_VERSION_ERROR_CODE

@@ -1,5 +1,7 @@
 package request
 
+import "github.com/EshaanAgg/toy-kafka/app/datatypes/response"
+
 type FetchV16Body struct {
 }
 
@@ -29,3 +31,14 @@ type FetchV16Request struct {
 //	  topic_id => UUID
 //	  partitions => INT32
 //	rack_id => COMPACT_STRING
+
+func NewFetchV16Request(r *RequestHeader) (Request, error) {
+	return &FetchV16Request{
+		RequestHeader: r,
+		Body:          &FetchV16Body{},
+	}, nil
+}
+
+func (r *FetchV16Request) Handle() (*response.Response, error) {
+	return nil, nil
+}

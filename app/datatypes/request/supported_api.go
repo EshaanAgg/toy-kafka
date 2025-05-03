@@ -7,9 +7,14 @@ type SupportedAPI struct {
 }
 
 var RequestKeyMap = map[int16]SupportedAPI{
+	1: {
+		MinVersion: 16,
+		MaxVersion: 16,
+		NewFn:      NewFetchV16Request,
+	},
 	18: {
 		MinVersion: 4,
 		MaxVersion: 4,
-		NewFn:      NewAPIVersionV4Request,
+		NewFn:      NewAPIVersionsV4Request,
 	},
 }
