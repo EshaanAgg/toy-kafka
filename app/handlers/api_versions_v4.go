@@ -6,6 +6,11 @@ import (
 	"github.com/EshaanAgg/toy-kafka/app/datatypes/request"
 )
 
+// ApiVersions Request (Version 4) => client_software_name client_software_version _tagged_fields
+//
+//	client_software_name => COMPACT_STRING
+//	client_software_version => COMPACT_STRING
+
 type APIVersionsV4Body struct {
 	ClientSoftwareName    string
 	ClientSoftwareVersion string
@@ -15,11 +20,6 @@ type APIVersionsV4Request struct {
 	*request.RequestHeader
 	Body *APIVersionsV4Body
 }
-
-// ApiVersions Request (Version 4) => client_software_name client_software_version _tagged_fields
-//
-//	client_software_name => COMPACT_STRING
-//	client_software_version => COMPACT_STRING
 
 func NewAPIVersionsV4Request(r *request.RequestHeader) (request.Request, error) {
 	clientSoftwareName, err := r.ReadCompactString()

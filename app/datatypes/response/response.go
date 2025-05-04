@@ -8,20 +8,17 @@ type Response struct {
 
 func NewResponse(correlationID int32) *Response {
 	r := &Response{}
+	// Add correlation ID to the response by default
 	r.WriteInt32(correlationID)
 
 	return r
 }
 
 func (r *Response) Bytes() []byte {
-	// Add correlation ID to the response
-	l := len(r.body)
-
 	var bytes []byte
-	// Write the length of the response
-	bytes = binary.BigEndian.AppendUint32(bytes, uint32(l))
 
-	bytes = append(bytes, r.body...)
+	bytes = binary.BigEndian.AppendUint32(bytes, uint32(len(r.body))) // Length of the response
+	bytes = append(bytes, r.body...)                                  // Data bytes
 
 	return bytes
 }

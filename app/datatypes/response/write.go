@@ -1,6 +1,8 @@
 package response
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+)
 
 func (r *Response) WriteInt16(vals ...int16) {
 	for _, val := range vals {

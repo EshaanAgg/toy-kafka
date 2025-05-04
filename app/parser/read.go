@@ -85,8 +85,8 @@ func (p *Parser) ReadNullableString() (*string, error) {
 		return nil, fmt.Errorf("ReadNullableString [content]: Not enough bytes for length %d", l)
 	}
 
-	s := string(content)
-	return &s, nil
+	v := string(content)
+	return &v, nil
 }
 
 func (p *Parser) ReadCompactString() (string, error) {
@@ -119,6 +119,14 @@ func (p *Parser) ReadString() (string, error) {
 		return "", fmt.Errorf("ReadString [content]: Not enough bytes for length %d", n)
 	}
 	return string(strBytes), nil
+}
+
+func (p *Parser) ReadUUID() ([]byte, error) {
+	b := p.getNextBytes(16)
+	if b == nil {
+		return nil, errors.New("ReadUUID: not enough bytes")
+	}
+	return b, nil
 }
 
 func (p *Parser) ReadZeroTaggedFieldArray() error {
