@@ -6,6 +6,7 @@ import (
 	"net"
 
 	"github.com/EshaanAgg/toy-kafka/app/datatypes/request"
+	"github.com/EshaanAgg/toy-kafka/app/handlers"
 )
 
 func handleConnection(conn net.Conn) {
@@ -42,7 +43,7 @@ func handleData(conn net.Conn, data []byte) bool {
 		return false
 	}
 
-	api, ok := request.RequestKeyMap[reqHeader.APIKey]
+	api, ok := handlers.RequestKeyMap[reqHeader.APIKey]
 	if !ok {
 		fmt.Printf("Unknown request type: %d\n", reqHeader.APIKey)
 		return false

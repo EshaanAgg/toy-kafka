@@ -1,9 +1,11 @@
-package request
+package handlers
+
+import "github.com/EshaanAgg/toy-kafka/app/datatypes/request"
 
 type SupportedAPI struct {
 	MinVersion int16
 	MaxVersion int16
-	NewFn      func(*RequestHeader) (Request, error)
+	NewFn      func(*request.RequestHeader) (request.Request, error)
 }
 
 var RequestKeyMap = map[int16]SupportedAPI{

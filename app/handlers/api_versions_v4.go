@@ -1,7 +1,9 @@
-package request
+package handlers
 
 import (
 	"fmt"
+
+	"github.com/EshaanAgg/toy-kafka/app/datatypes/request"
 )
 
 type APIVersionsV4Body struct {
@@ -10,7 +12,7 @@ type APIVersionsV4Body struct {
 }
 
 type APIVersionsV4Request struct {
-	*RequestHeader
+	*request.RequestHeader
 	Body *APIVersionsV4Body
 }
 
@@ -19,7 +21,7 @@ type APIVersionsV4Request struct {
 //	client_software_name => COMPACT_STRING
 //	client_software_version => COMPACT_STRING
 
-func NewAPIVersionsV4Request(r *RequestHeader) (Request, error) {
+func NewAPIVersionsV4Request(r *request.RequestHeader) (request.Request, error) {
 	clientSoftwareName, err := r.ReadCompactString()
 	if err != nil {
 		return nil, fmt.Errorf("newAPIVersionBody.clientSoftwareName: %w", err)

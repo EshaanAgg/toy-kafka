@@ -2,11 +2,11 @@
 
 # Toy Kafka
 
-This my Go Kafka server built as a part of the ["Build Your Own Kafka" Challenge](https://codecrafters.io/challenges/kafka).
+This my Kafka server built as a part of the ["Build Your Own Kafka" challenge](https://codecrafters.io/challenges/kafka) in GoLang.
 
 In this challenge, I build a toy Kafka clone that's capable of accepting and responding to multiple standard Kafka requests. This also helps to learn about encoding and decoding messages using the Kafka wire protocol. 
 
-**Note**: If yyou want to try it out for yourself, head over to [codecrafters.io](https://codecrafters.io) and start the challenge.
+**Note**: If you want to try it out for yourself, head over to [codecrafters.io](https://codecrafters.io) and start the challenge.
 
 
 ## Features
