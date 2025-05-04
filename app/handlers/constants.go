@@ -2,6 +2,8 @@ package handlers
 
 import "github.com/EshaanAgg/toy-kafka/app/datatypes/request"
 
+const UNSUPPORTED_API_VERSION_ERROR_CODE = 35
+
 type SupportedAPI struct {
 	MinVersion int16
 	MaxVersion int16

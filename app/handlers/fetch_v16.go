@@ -14,7 +14,6 @@ type FetchV16Request struct {
 }
 
 // Fetch Request (Version: 16) => max_wait_ms min_bytes max_bytes isolation_level session_id session_epoch [topics] [forgotten_topics_data] rack_id _tagged_fields
-//
 //	max_wait_ms => INT32
 //	min_bytes => INT32
 //	max_bytes => INT32
