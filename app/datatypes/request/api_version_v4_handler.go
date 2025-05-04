@@ -20,6 +20,7 @@ func (r *APIVersionsV4Request) Handle() (*response.Response, error) {
 
 	res.WriteInt16(r.getErrorCode()) // Error code
 
+	// API keys
 	res.WriteCompactArrayLength(len(RequestKeyMap))
 	for key, api := range RequestKeyMap {
 		res.WriteInt16(key, api.MinVersion, api.MaxVersion)

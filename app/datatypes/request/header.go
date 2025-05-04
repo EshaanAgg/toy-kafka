@@ -27,7 +27,7 @@ func NewRequestHeader(buf []byte) (*RequestHeader, error) {
 
 	bodyLen, err := r.ReadInt32()
 	if err != nil {
-		return nil, fmt.Errorf("NewRequest [messageLength]: %w", err)
+		return nil, fmt.Errorf("NewRequestHeader [messageLength]: %w", err)
 	}
 	r.Length = bodyLen
 
