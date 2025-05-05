@@ -3,7 +3,7 @@ package request
 import (
 	"fmt"
 
-	"github.com/EshaanAgg/toy-kafka/app/parser"
+	"github.com/EshaanAgg/toy-kafka/app/datatypes/request/parser"
 )
 
 type HeaderFields struct {

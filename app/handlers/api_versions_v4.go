@@ -28,6 +28,14 @@ func NewAPIVersionsV4Request(r *request.RequestHeader) (request.Request, error) 
 	}, nil
 }
 
+func (r *APIVersionsV4Request) getErrorCode() int16 {
+	api := RequestKeyMap[r.APIKey]
+	if api.MinVersion > r.APIVersion || api.MaxVersion < r.APIVersion {
+		return UNSUPPORTED_API_VERSION_ERROR_CODE
+	}
+	return 0
+}
+
 // Response
 
 type APIVersionsV4Response_APIKey struct {
@@ -58,12 +66,4 @@ func (r *APIVersionsV4Request) Handle() (*response.Response, error) {
 	}
 
 	return response.NewResponseWithBody(r.CorrelationID, body)
-}
-
-func (r *APIVersionsV4Request) getErrorCode() int16 {
-	api := RequestKeyMap[r.APIKey]
-	if api.MinVersion > r.APIVersion || api.MaxVersion < r.APIVersion {
-		return UNSUPPORTED_API_VERSION_ERROR_CODE
-	}
-	return 0
 }
