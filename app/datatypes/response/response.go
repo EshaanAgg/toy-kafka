@@ -16,12 +16,14 @@ func NewResponse(correlationID int32) *Response {
 
 // Creates a new response with the given correlation ID and body.
 // It automatically encodes the body using the AutoEncodeBody method.
-func NewResponseWithBody(correlationID int32, bodyPtr any) *Response {
+// The base response struct is always assumed to NOT be an inline struct,
+// and thus would end with empty tagged fields.
+func NewResponseWithBody(correlationID int32, bodyPtr any) (*Response, error) {
 	r := NewResponse(correlationID)
 	if err := r.AutoEncodeBody(bodyPtr, false); err != nil {
-		return nil
+		return nil, err
 	}
-	return r
+	return r, nil
 }
 
 func (r *Response) Bytes() []byte {

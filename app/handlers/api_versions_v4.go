@@ -5,14 +5,15 @@ import (
 	"github.com/EshaanAgg/toy-kafka/app/datatypes/response"
 )
 
-type APIVersionsV4Body struct {
-	ClientSoftwareName    string `kafka:"compact_string"`
-	ClientSoftwareVersion string `kafka:"compact_string"`
-}
+// Request
 
 type APIVersionsV4Request struct {
 	*request.RequestHeader
 	Body *APIVersionsV4Body
+}
+type APIVersionsV4Body struct {
+	ClientSoftwareName    string `kafka:"compact_string"`
+	ClientSoftwareVersion string `kafka:"compact_string"`
 }
 
 func NewAPIVersionsV4Request(r *request.RequestHeader) (request.Request, error) {
@@ -27,30 +28,36 @@ func NewAPIVersionsV4Request(r *request.RequestHeader) (request.Request, error) 
 	}, nil
 }
 
-// ApiVersions Response (Version: 4) => error_code [api_keys] throttle_time_ms _tagged_fields
-//	error_code => INT16
-//	api_keys => api_key min_version max_version _tagged_fields
-//	  api_key => INT16
-//	  min_version => INT16
-//	  max_version => INT16
-//	throttle_time_ms => INT32
+// Response
+
+type APIVersionsV4Response_APIKey struct {
+	APIKey     int16 `kafka:"int16"`
+	MinVersion int16 `kafka:"int16"`
+	MaxVersion int16 `kafka:"int16"`
+}
+
+type APIVersionsV4Response struct {
+	ErrorCode    int16                          `kafka:"int16"`
+	APIKeys      []APIVersionsV4Response_APIKey `kafka:"compact_array:struct"`
+	ThrottleTime int32                          `kafka:"int32"`
+}
 
 func (r *APIVersionsV4Request) Handle() (*response.Response, error) {
-	res := response.NewResponse(r.CorrelationID)
-
-	res.WriteInt16(r.getErrorCode()) // Error code
-
-	// API keys
-	res.WriteCompactArrayLength(len(RequestKeyMap))
-	for key, api := range RequestKeyMap {
-		res.WriteInt16(key, api.MinVersion, api.MaxVersion)
-		res.WriteEmptyTaggedFields()
+	body := &APIVersionsV4Response{
+		ErrorCode:    r.getErrorCode(),
+		APIKeys:      make([]APIVersionsV4Response_APIKey, 0),
+		ThrottleTime: 0,
 	}
 
-	res.WriteInt32(0) // Throttle time
-	res.WriteEmptyTaggedFields()
+	for key, api := range RequestKeyMap {
+		body.APIKeys = append(body.APIKeys, APIVersionsV4Response_APIKey{
+			APIKey:     key,
+			MinVersion: api.MinVersion,
+			MaxVersion: api.MaxVersion,
+		})
+	}
 
-	return res, nil
+	return response.NewResponseWithBody(r.CorrelationID, body)
 }
 
 func (r *APIVersionsV4Request) getErrorCode() int16 {
