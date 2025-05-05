@@ -5,10 +5,6 @@ import (
 	"github.com/EshaanAgg/toy-kafka/app/datatypes/response"
 )
 
-// ApiVersions Request (Version 4) => client_software_name client_software_version _tagged_fields
-//	client_software_name => COMPACT_STRING
-//	client_software_version => COMPACT_STRING
-
 type APIVersionsV4Body struct {
 	ClientSoftwareName    string `kafka:"compact_string"`
 	ClientSoftwareVersion string `kafka:"compact_string"`

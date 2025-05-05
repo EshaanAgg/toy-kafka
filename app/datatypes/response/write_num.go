@@ -4,6 +4,12 @@ import (
 	"encoding/binary"
 )
 
+func (r *Response) WriteInt8(vals ...int8) {
+	for _, val := range vals {
+		r.body = append(r.body, byte(val))
+	}
+}
+
 func (r *Response) WriteInt16(vals ...int16) {
 	for _, val := range vals {
 		r.body = binary.BigEndian.AppendUint16(r.body, uint16(val))
@@ -13,6 +19,12 @@ func (r *Response) WriteInt16(vals ...int16) {
 func (r *Response) WriteInt32(vals ...int32) {
 	for _, val := range vals {
 		r.body = binary.BigEndian.AppendUint32(r.body, uint32(val))
+	}
+}
+
+func (r *Response) WriteInt64(vals ...int64) {
+	for _, val := range vals {
+		r.body = binary.BigEndian.AppendUint64(r.body, uint64(val))
 	}
 }
 

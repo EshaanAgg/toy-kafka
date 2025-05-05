@@ -40,7 +40,7 @@ func (p *Parser) ReadCompactString() (string, error) {
 }
 
 func (p *Parser) ReadString() (string, error) {
-	// The value of N + 1 is encoded as an UNSIGNED variable-length integer
+	// The value of N is encoded as an INT16
 	n, err := p.ReadInt16()
 	if err != nil {
 		return "", fmt.Errorf("ReadString [length]: %w", err)

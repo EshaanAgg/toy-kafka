@@ -14,6 +14,16 @@ func NewResponse(correlationID int32) *Response {
 	return r
 }
 
+// Creates a new response with the given correlation ID and body.
+// It automatically encodes the body using the AutoEncodeBody method.
+func NewResponseWithBody(correlationID int32, bodyPtr any) *Response {
+	r := NewResponse(correlationID)
+	if err := r.AutoEncodeBody(bodyPtr, false); err != nil {
+		return nil
+	}
+	return r
+}
+
 func (r *Response) Bytes() []byte {
 	var bytes []byte
 
