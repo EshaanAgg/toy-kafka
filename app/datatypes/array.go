@@ -6,8 +6,6 @@ import (
 	"reflect"
 )
 
-// A null array is represented with a length of 0.
-// Otherwise, we encode the len + 1 as a VarUInt
 type CompactArray[T any] struct {
 	Values []T
 }

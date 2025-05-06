@@ -37,6 +37,8 @@ func Marshal(obj any, b *bytes.Buffer) error {
 	return nil
 }
 
+// Unmarshal must be called with a pointer to a struct where
+// the unmarshalled data is to be stored.
 func Unmarshal(obj any, p *Parser) error {
 	// We need a pointer to struct for unmarshalling
 	objVal := reflect.ValueOf(obj)

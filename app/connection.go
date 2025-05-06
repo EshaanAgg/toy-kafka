@@ -5,7 +5,7 @@ import (
 	"io"
 	"net"
 
-	"github.com/EshaanAgg/toy-kafka/app/datatypes/request"
+	"github.com/EshaanAgg/toy-kafka/app/datatypes/protocol"
 	"github.com/EshaanAgg/toy-kafka/app/handlers"
 )
 
@@ -37,7 +37,7 @@ func handleConnection(conn net.Conn) {
 
 // Handles the recieved data. Returns true if the data was handled successfully.
 func handleData(conn net.Conn, data []byte) bool {
-	reqHeader, err := request.NewRequestHeader(data)
+	reqHeader, err := protocol.NewRequestHeader(data)
 	if err != nil {
 		fmt.Printf("Error in parsing request header: %s\n", err.Error())
 		return false
@@ -55,13 +55,13 @@ func handleData(conn net.Conn, data []byte) bool {
 		return false
 	}
 
-	res, err := req.Handle()
+	resBytes, err := req.Handle()
 	if err != nil {
 		fmt.Printf("Error in handling request: %s\n", err.Error())
 		return false
 	}
 
-	_, err = conn.Write(res.Bytes())
+	_, err = conn.Write(resBytes)
 	if err != nil {
 		fmt.Printf("Error writing response: %s\n", err.Error())
 		return false

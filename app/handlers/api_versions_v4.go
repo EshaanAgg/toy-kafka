@@ -1,25 +1,25 @@
 package handlers
 
 import (
-	"github.com/EshaanAgg/toy-kafka/app/datatypes/request"
-	"github.com/EshaanAgg/toy-kafka/app/datatypes/response"
+	"fmt"
+
+	"github.com/EshaanAgg/toy-kafka/app/datatypes"
+	"github.com/EshaanAgg/toy-kafka/app/datatypes/protocol"
 )
 
-// Request
-
 type APIVersionsV4Request struct {
-	*request.RequestHeader
+	*protocol.RequestHeader
 	Body *APIVersionsV4Body
 }
 type APIVersionsV4Body struct {
-	ClientSoftwareName    string `kafka:"compact_string"`
-	ClientSoftwareVersion string `kafka:"compact_string"`
+	ClientSoftwareName    datatypes.CompactString
+	ClientSoftwareVersion datatypes.CompactString
 }
 
-func NewAPIVersionsV4Request(r *request.RequestHeader) (request.Request, error) {
+func NewAPIVersionsV4Request(r *protocol.RequestHeader) (protocol.Request, error) {
 	var body APIVersionsV4Body
-	if err := r.AutoDecodeBody("APIVersionsV4Request.Body", &body, true); err != nil {
-		return nil, err
+	if err := datatypes.Unmarshal(&body, r.P); err != nil {
+		return nil, fmt.Errorf("unable to decode the request body: %w", err)
 	}
 
 	return &APIVersionsV4Request{
@@ -28,42 +28,41 @@ func NewAPIVersionsV4Request(r *request.RequestHeader) (request.Request, error) 
 	}, nil
 }
 
-func (r *APIVersionsV4Request) getErrorCode() int16 {
+func (r *APIVersionsV4Request) getErrorCode() datatypes.Int16 {
 	api := RequestKeyMap[r.APIKey]
-	if api.MinVersion > r.APIVersion || api.MaxVersion < r.APIVersion {
+	if api.MinVersion > int16(r.APIVersion) || api.MaxVersion < int16(r.APIVersion) {
 		return UNSUPPORTED_API_VERSION_ERROR_CODE
 	}
 	return 0
 }
 
-// Response
-
 type APIVersionsV4Response_APIKey struct {
-	APIKey     int16 `kafka:"int16"`
-	MinVersion int16 `kafka:"int16"`
-	MaxVersion int16 `kafka:"int16"`
+	APIKey       datatypes.Int16
+	MinVersion   datatypes.Int16
+	MaxVersion   datatypes.Int16
+	TaggedFields datatypes.TaggedFields
 }
 
 type APIVersionsV4Response struct {
-	ErrorCode    int16                          `kafka:"int16"`
-	APIKeys      []APIVersionsV4Response_APIKey `kafka:"compact_array:struct"`
-	ThrottleTime int32                          `kafka:"int32"`
+	ErrorCode    datatypes.Int16
+	APIKeys      datatypes.CompactArray[APIVersionsV4Response_APIKey]
+	ThrottleTime datatypes.Int32
+	TaggedFields datatypes.TaggedFields
 }
 
-func (r *APIVersionsV4Request) Handle() (*response.Response, error) {
+func (r *APIVersionsV4Request) Handle() ([]byte, error) {
 	body := &APIVersionsV4Response{
 		ErrorCode:    r.getErrorCode(),
-		APIKeys:      make([]APIVersionsV4Response_APIKey, 0),
 		ThrottleTime: 0,
 	}
 
 	for key, api := range RequestKeyMap {
-		body.APIKeys = append(body.APIKeys, APIVersionsV4Response_APIKey{
-			APIKey:     key,
-			MinVersion: api.MinVersion,
-			MaxVersion: api.MaxVersion,
+		body.APIKeys.Values = append(body.APIKeys.Values, APIVersionsV4Response_APIKey{
+			APIKey:     datatypes.Int16(key),
+			MinVersion: datatypes.Int16(api.MinVersion),
+			MaxVersion: datatypes.Int16(api.MaxVersion),
 		})
 	}
 
-	return response.NewResponseWithBody(r.CorrelationID, body)
+	return protocol.NewResponse(r.CorrelationID, body).Bytes()
 }
