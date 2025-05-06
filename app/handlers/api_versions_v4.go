@@ -64,5 +64,9 @@ func (r *APIVersionsV4Request) Handle() ([]byte, error) {
 		})
 	}
 
-	return protocol.NewResponse(r.CorrelationID, body).Bytes()
+	header := &protocol.HeaderV0{
+		CorrelationID: r.CorrelationID,
+	}
+
+	return protocol.NewResponse(header, body).Bytes()
 }

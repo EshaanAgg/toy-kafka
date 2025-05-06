@@ -12,7 +12,7 @@ type FetchV16Request_AbortedTransaction struct {
 }
 
 type FetchV16Response_Partition struct {
-	PartitionIndex       datatypes.Int32
+	Index                datatypes.Int32
 	ErrorCode            datatypes.Int16
 	HighWatermark        datatypes.Int64
 	LastStableOffset     datatypes.Int64
@@ -39,6 +39,8 @@ type FetchV16Response struct {
 
 func (r *FetchV16Request) Handle() ([]byte, error) {
 	body := &FetchV16Response{}
-	// TODO: Handle the response
-	return protocol.NewResponse(r.CorrelationID, body).Bytes()
+	header := &protocol.HeaderV1{
+		CorrelationID: r.CorrelationID,
+	}
+	return protocol.NewResponse(header, body).Bytes()
 }

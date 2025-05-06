@@ -8,25 +8,25 @@ import (
 	"github.com/EshaanAgg/toy-kafka/app/datatypes"
 )
 
-type Response[T any] struct {
-	CorrelationID datatypes.Int32
-	Body          *T
+type Response[H any, B any] struct {
+	Header *H
+	Body   *B
 }
 
-func NewResponse[T any](correlationID datatypes.Int32, body *T) *Response[T] {
-	return &Response[T]{
-		CorrelationID: correlationID,
-		Body:          body,
+func NewResponse[H any, B any](header *H, body *B) *Response[H, B] {
+	return &Response[H, B]{
+		Header: header,
+		Body:   body,
 	}
 }
 
-func (r *Response[T]) Bytes() ([]byte, error) {
+func (r *Response[T, B]) Bytes() ([]byte, error) {
 	var dataBytes bytes.Buffer
 
-	// Add correlation ID to the buffer as header
-	err := r.CorrelationID.Marshal(&dataBytes)
+	// Add the header to the buffer
+	err := datatypes.Marshal(*r.Header, &dataBytes)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal correlation ID: %w", err)
+		return nil, fmt.Errorf("failed to marshal the header: %w", err)
 	}
 
 	// Add the body to the buffer
