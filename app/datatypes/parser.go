@@ -1,4 +1,4 @@
-package parser
+package datatypes
 
 type Parser struct {
 	bytes []byte
