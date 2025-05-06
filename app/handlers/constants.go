@@ -19,4 +19,9 @@ var RequestKeyMap = map[datatypes.Int16]SupportedAPI{
 		MaxVersion: 4,
 		NewFn:      NewAPIVersionsV4Request,
 	},
+	1: {
+		MinVersion: 16,
+		MaxVersion: 16,
+		NewFn:      NewFetch16Request,
+	},
 }
