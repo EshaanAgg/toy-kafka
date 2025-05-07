@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"fmt"
-
 	"github.com/EshaanAgg/toy-kafka/app/datatypes"
 	"github.com/EshaanAgg/toy-kafka/app/datatypes/protocol"
 )
@@ -14,17 +12,18 @@ type FetchV16_Partition struct {
 	LastFetchedEpoch   datatypes.Int32
 	LogStartOffset     datatypes.Int64
 	PartitionMaxBytes  datatypes.Int32
+	TaggedFields       datatypes.TaggedFields
 }
 
 type FetchV16_Topic struct {
 	TopicID      datatypes.UUID
-	Paritions    datatypes.CompactArray[FetchV16_Partition]
+	Partitions   datatypes.CompactArray[FetchV16_Partition]
 	TaggedFields datatypes.TaggedFields
 }
 
 type FetchV16_ForgottenTopic struct {
 	TopicID      datatypes.UUID
-	Paritions    datatypes.CompactArray[datatypes.Int32]
+	Partitions   datatypes.CompactArray[datatypes.Int32]
 	TaggedFields datatypes.TaggedFields
 }
 
@@ -47,13 +46,13 @@ type FetchV16Request struct {
 }
 
 func NewFetch16Request(r *protocol.RequestHeader) (protocol.Request, error) {
-	var body FetchV16Body
-	if err := datatypes.Unmarshal(&body, r.P); err != nil {
-		return nil, fmt.Errorf("unable to decode the request body: %w", err)
+	body, err := getBody[FetchV16Body](r.P)
+	if err != nil {
+		return nil, err
 	}
 
 	return &FetchV16Request{
 		RequestHeader: r,
-		Body:          &body,
+		Body:          body,
 	}, nil
 }

@@ -1,5 +1,7 @@
 package datatypes
 
+import "fmt"
+
 type Parser struct {
 	bytes []byte
 	idx   int
@@ -23,4 +25,14 @@ func (p *Parser) getNextBytes(n int) []byte {
 	b := p.bytes[p.idx : p.idx+n]
 	p.idx += n
 	return b
+}
+
+func (p *Parser) IsAtEnd() bool {
+	return p.idx >= p.l
+}
+
+func (p *Parser) Debug() {
+	fmt.Printf("Parser [idx=%d, l=%d]: ", p.idx, p.l)
+	end := min(p.idx+10, p.l)
+	fmt.Printf("bytes=%v\n", p.bytes[p.idx:end])
 }

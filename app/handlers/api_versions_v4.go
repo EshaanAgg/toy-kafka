@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"fmt"
-
 	"github.com/EshaanAgg/toy-kafka/app/datatypes"
 	"github.com/EshaanAgg/toy-kafka/app/datatypes/protocol"
 )
@@ -14,17 +12,18 @@ type APIVersionsV4Request struct {
 type APIVersionsV4Body struct {
 	ClientSoftwareName    datatypes.CompactString
 	ClientSoftwareVersion datatypes.CompactString
+	TaggedFields          datatypes.TaggedFields
 }
 
 func NewAPIVersionsV4Request(r *protocol.RequestHeader) (protocol.Request, error) {
-	var body APIVersionsV4Body
-	if err := datatypes.Unmarshal(&body, r.P); err != nil {
-		return nil, fmt.Errorf("unable to decode the request body: %w", err)
+	body, err := getBody[APIVersionsV4Body](r.P)
+	if err != nil {
+		return nil, err
 	}
 
 	return &APIVersionsV4Request{
 		RequestHeader: r,
-		Body:          &body,
+		Body:          body,
 	}, nil
 }
 

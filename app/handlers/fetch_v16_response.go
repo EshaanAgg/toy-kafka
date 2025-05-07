@@ -5,6 +5,8 @@ import (
 	"github.com/EshaanAgg/toy-kafka/app/datatypes/protocol"
 )
 
+const UNKNOWN_TOPIC_ID = 100
+
 type FetchV16Request_AbortedTransaction struct {
 	ProducerID   datatypes.Int64
 	FirstOffset  datatypes.Int64
@@ -38,9 +40,30 @@ type FetchV16Response struct {
 }
 
 func (r *FetchV16Request) Handle() ([]byte, error) {
-	body := &FetchV16Response{}
 	header := &protocol.HeaderV1{
 		CorrelationID: r.CorrelationID,
 	}
-	return protocol.NewResponse(header, body).Bytes()
+
+	resBody := &FetchV16Response{
+		ThrottleTimeMS: 0,
+		ErrorCode:      0,
+		SessionID:      0,
+	}
+
+	for _, topic := range r.Body.Topics.Values {
+		// Create a new partition for each topic
+		partition := &FetchV16Response_Partition{
+			Index:     0,
+			ErrorCode: UNKNOWN_TOPIC_ID,
+		}
+
+		response := &FetchV16Response_Response{
+			TopicID: topic.TopicID,
+		}
+		response.Partitions.Append(partition)
+
+		resBody.Responses.Append(response)
+	}
+
+	return protocol.NewResponse(header, resBody).Bytes()
 }

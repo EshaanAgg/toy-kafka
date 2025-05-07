@@ -10,6 +10,10 @@ type CompactArray[T any] struct {
 	Values []T
 }
 
+func (a *CompactArray[T]) Append(v *T) {
+	a.Values = append(a.Values, *v)
+}
+
 func (a CompactArray[T]) Marshal(b *bytes.Buffer) error {
 	if a.Values == nil {
 		var n VarUInt = 0

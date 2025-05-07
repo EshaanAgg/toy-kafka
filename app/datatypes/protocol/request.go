@@ -10,11 +10,13 @@ type Request interface {
 	Handle() ([]byte, error)
 }
 
+// HeaderFields contains all the fields that are parsed in a HeaderV2 format.
 type HeaderFields struct {
 	APIKey        datatypes.Int16
 	APIVersion    datatypes.Int16
 	CorrelationID datatypes.Int32
 	ClientID      datatypes.NullableString
+	TaggedFields  datatypes.TaggedFields
 }
 
 type RequestHeader struct {

@@ -12,7 +12,7 @@ import (
 func handleConnection(conn net.Conn) {
 	for {
 		buf := make([]byte, 1024)
-		_, err := conn.Read(buf)
+		n, err := conn.Read(buf)
 		if err != nil {
 			if err == io.EOF {
 				fmt.Printf("Connection closed to %s\n", conn.LocalAddr().String())
@@ -28,7 +28,7 @@ func handleConnection(conn net.Conn) {
 
 		// If failed to handle the data recieved from the client, close the connection.
 		// TODO: Handle the errors gracefully and inform the client.
-		if !handleData(conn, buf) {
+		if !handleData(conn, buf[:n]) {
 			conn.Close()
 			return
 		}
