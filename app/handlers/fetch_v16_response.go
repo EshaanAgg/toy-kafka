@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"fmt"
+
 	"github.com/EshaanAgg/toy-kafka/app/broker"
 	"github.com/EshaanAgg/toy-kafka/app/datatypes"
 	"github.com/EshaanAgg/toy-kafka/app/datatypes/protocol"
@@ -51,23 +53,35 @@ func (r *FetchV16Request) Handle() ([]byte, error) {
 		SessionID:      0,
 	}
 
-	bro := broker.Broker{}
-	bro.GetClusterMetadata()
+	broker, err := broker.NewBroker()
+	if err != nil {
+		return nil, fmt.Errorf("unable to create broker: %w", err)
+	}
 
 	for _, topic := range r.Body.Topics.Values {
-		// Create a new partition for each topic
+		resBody.Responses.Append(getResponseForTopic(&topic, broker))
+	}
+
+	return protocol.NewResponse(header, resBody).Bytes()
+}
+
+// getResponseForTopic creates a FetchV16Response_Response for the given topic.
+// If the topic is not found, it creates a partition with UNKNOWN_TOPIC_ID.
+func getResponseForTopic(topic *FetchV16_Topic, broker *broker.Broker) *FetchV16Response_Response {
+	response := &FetchV16Response_Response{
+		TopicID: topic.TopicID,
+	}
+
+	_, ok := broker.TopicNameFromID[topic.TopicID]
+	if !ok {
+		// Topic not found, so create a parition with UNKNOWN_TOPIC_ID
 		partition := &FetchV16Response_Partition{
 			Index:     0,
 			ErrorCode: UNKNOWN_TOPIC_ID,
 		}
-
-		response := &FetchV16Response_Response{
-			TopicID: topic.TopicID,
-		}
 		response.Partitions.Append(partition)
-
-		resBody.Responses.Append(response)
+		return response
 	}
 
-	return protocol.NewResponse(header, resBody).Bytes()
+	return response
 }
