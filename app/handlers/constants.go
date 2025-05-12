@@ -25,6 +25,11 @@ var RequestKeyMap = map[datatypes.Int16]SupportedAPI{
 	1: {
 		MinVersion: 16,
 		MaxVersion: 16,
-		NewFn:      NewFetch16Request,
+		NewFn:      NewFetchV16Request,
+	},
+	75: {
+		MinVersion: 0,
+		MaxVersion: 0,
+		NewFn:      NewDescribeTopicPartitionsV0Request,
 	},
 }

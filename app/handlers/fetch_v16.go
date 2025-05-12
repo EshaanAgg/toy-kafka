@@ -45,7 +45,7 @@ type FetchV16Request struct {
 	Body *FetchV16Body
 }
 
-func NewFetch16Request(r *protocol.RequestHeader) (protocol.Request, error) {
+func NewFetchV16Request(r *protocol.RequestHeader) (protocol.Request, error) {
 	body, err := getBody[FetchV16Body](r.P)
 	if err != nil {
 		return nil, err
