@@ -8,10 +8,7 @@ import (
 
 type TaggedFields int
 type UUID [16]byte
-
-// CompactRecords is an alias for CompactNullableBytes to represent
-// Kafka records in a compact format.
-type CompactRecords = CompactNullableBytes
+type CompactRecords = VarIntBytes
 
 func (t *TaggedFields) Unmarshal(p *Parser) error {
 	var tagLen VarUInt = 0

@@ -6,8 +6,9 @@ import (
 )
 
 const NO_ERROR_CODE = 0
-const UNKNOWN_TOPIC_ID_ERROR_CODE = 100
+const UNKNOWN_TOPIC_OR_PARTITION_ERROR_CODE = 3
 const UNSUPPORTED_API_VERSION_ERROR_CODE = 35
+const UNKNOWN_TOPIC_ID_ERROR_CODE = 100
 
 type SupportedAPI struct {
 	MinVersion int16

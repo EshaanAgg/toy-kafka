@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/EshaanAgg/toy-kafka/app/broker"
 	"github.com/EshaanAgg/toy-kafka/app/datatypes"
@@ -70,7 +71,7 @@ func getResponseForTopic(topic *FetchV16_Topic, broker *broker.Broker) *FetchV16
 		TopicID: topic.TopicID,
 	}
 
-	_, ok := broker.TopicNameFromID[topic.TopicID]
+	name, ok := broker.TopicNameFromID[topic.TopicID]
 	if !ok {
 		// Topic not found, so create a parition with UNKNOWN_TOPIC_ID
 		partition := &FetchV16Response_Partition{
@@ -81,12 +82,35 @@ func getResponseForTopic(topic *FetchV16_Topic, broker *broker.Broker) *FetchV16
 		return response
 	}
 
-	// If the topic is found, create 1 default partition for the same
-	partition := &FetchV16Response_Partition{
-		Index:     0,
-		ErrorCode: NO_ERROR_CODE,
+	// If the topic is found, create partitions for it
+	onDiskPartitions, ok := broker.TopicPartitions[name]
+	if !ok {
+		panic(fmt.Sprintf("Topic %s exists, but there are no partitions for the same", name))
 	}
-	response.Partitions.Append(partition)
+
+	for _, requestedPartition := range topic.Partitions.Values {
+		partition := &FetchV16Response_Partition{
+			Index:     requestedPartition.Partition,
+			ErrorCode: NO_ERROR_CODE,
+		}
+		partitionIdx := int(requestedPartition.Partition)
+		existsOnDisk := slices.Contains(onDiskPartitions, partitionIdx)
+
+		if !existsOnDisk {
+			// Update the error code to indicate that the partition does not exist
+			partition.ErrorCode = UNKNOWN_TOPIC_OR_PARTITION_ERROR_CODE
+		} else {
+			// Fetch the partition data from the broker
+			partitionData, err := broker.GetTopicPartitionData(name, partitionIdx)
+			if err != nil {
+				panic(fmt.Sprintf("Unable to get partition data for topic %s and partition %d: %v", name, partitionIdx, err))
+			}
+			partition.Records = partitionData
+		}
+
+		// Append the partition to the response
+		response.Partitions.Append(partition)
+	}
 
 	return response
 }
