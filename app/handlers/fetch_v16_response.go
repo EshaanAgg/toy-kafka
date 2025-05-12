@@ -8,8 +8,6 @@ import (
 	"github.com/EshaanAgg/toy-kafka/app/datatypes/protocol"
 )
 
-const UNKNOWN_TOPIC_ID = 100
-
 type FetchV16Request_AbortedTransaction struct {
 	ProducerID   datatypes.Int64
 	FirstOffset  datatypes.Int64
@@ -49,7 +47,7 @@ func (r *FetchV16Request) Handle() ([]byte, error) {
 
 	resBody := &FetchV16Response{
 		ThrottleTimeMS: 0,
-		ErrorCode:      0,
+		ErrorCode:      NO_ERROR_CODE,
 		SessionID:      0,
 	}
 
@@ -77,11 +75,18 @@ func getResponseForTopic(topic *FetchV16_Topic, broker *broker.Broker) *FetchV16
 		// Topic not found, so create a parition with UNKNOWN_TOPIC_ID
 		partition := &FetchV16Response_Partition{
 			Index:     0,
-			ErrorCode: UNKNOWN_TOPIC_ID,
+			ErrorCode: UNKNOWN_TOPIC_ID_ERROR_CODE,
 		}
 		response.Partitions.Append(partition)
 		return response
 	}
+
+	// If the topic is found, create 1 default partition for the same
+	partition := &FetchV16Response_Partition{
+		Index:     0,
+		ErrorCode: NO_ERROR_CODE,
+	}
+	response.Partitions.Append(partition)
 
 	return response
 }

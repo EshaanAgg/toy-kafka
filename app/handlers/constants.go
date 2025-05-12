@@ -5,6 +5,8 @@ import (
 	"github.com/EshaanAgg/toy-kafka/app/datatypes/protocol"
 )
 
+const NO_ERROR_CODE = 0
+const UNKNOWN_TOPIC_ID_ERROR_CODE = 100
 const UNSUPPORTED_API_VERSION_ERROR_CODE = 35
 
 type SupportedAPI struct {
