@@ -7,6 +7,8 @@ import (
 
 type String string
 type CompactString string
+type VarIntString string
+
 type NullableString struct {
 	IsNull bool
 	Value  string
@@ -104,6 +106,31 @@ func (s NullableString) Marshal(b *bytes.Buffer) error {
 	}
 	if _, err := b.Write([]byte(s.Value)); err != nil {
 		return fmt.Errorf("nullable_string.content: %w", err)
+	}
+	return nil
+}
+
+func (s *VarIntString) Unmarshal(p *Parser) error {
+	var n VarInt
+	if err := n.Unmarshal(p); err != nil {
+		return fmt.Errorf("varint_string.length: %w", err)
+	}
+
+	strBytes := p.getNextBytes(int(n))
+	if strBytes == nil {
+		return fmt.Errorf("varint_string.content: Not enough bytes for length %d", n)
+	}
+	*s = VarIntString(strBytes)
+	return nil
+}
+
+func (s VarIntString) Marshal(b *bytes.Buffer) error {
+	l := VarInt(len(s))
+	if err := l.Marshal(b); err != nil {
+		return fmt.Errorf("varint_string.length: %w", err)
+	}
+	if _, err := b.Write([]byte(s)); err != nil {
+		return fmt.Errorf("varint_string.content: %w", err)
 	}
 	return nil
 }

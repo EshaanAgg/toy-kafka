@@ -19,7 +19,14 @@ func NewParser(bytes []byte) *Parser {
 // Returns the n bytes starting from the current index
 // and increments the index by n.
 func (p *Parser) getNextBytes(n int) []byte {
-	if p.idx == p.l || p.idx+n > p.l {
+	if n < 0 {
+		panic("getNextBytes: n must be non-negative")
+	}
+	if n == 0 {
+		return make([]byte, 0)
+	}
+
+	if p.idx+n-1 >= p.l {
 		return nil
 	}
 	b := p.bytes[p.idx : p.idx+n]

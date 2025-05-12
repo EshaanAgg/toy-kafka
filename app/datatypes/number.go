@@ -10,8 +10,10 @@ type Int8 int8
 type Int16 int16
 type Int32 int32
 type Int64 int64
+type UInt32 uint32
 type VarInt int64
 type VarUInt uint64
+type VarLong = VarInt
 
 func (i *Int8) Unmarshal(p *Parser) error {
 	b := p.getNextBytes(1)
@@ -63,6 +65,19 @@ func (i *Int64) Unmarshal(p *Parser) error {
 
 func (i Int64) Marshal(b *bytes.Buffer) error {
 	return binary.Write(b, binary.BigEndian, uint64(i))
+}
+
+func (i *UInt32) Unmarshal(p *Parser) error {
+	b := p.getNextBytes(4)
+	if b == nil {
+		return errors.New("uint32: not enough bytes")
+	}
+	*i = UInt32(binary.BigEndian.Uint32(b))
+	return nil
+}
+
+func (i UInt32) Marshal(b *bytes.Buffer) error {
+	return binary.Write(b, binary.BigEndian, uint32(i))
 }
 
 func (i *VarInt) Unmarshal(p *Parser) error {

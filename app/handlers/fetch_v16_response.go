@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/EshaanAgg/toy-kafka/app/broker"
 	"github.com/EshaanAgg/toy-kafka/app/datatypes"
 	"github.com/EshaanAgg/toy-kafka/app/datatypes/protocol"
 )
@@ -49,6 +50,9 @@ func (r *FetchV16Request) Handle() ([]byte, error) {
 		ErrorCode:      0,
 		SessionID:      0,
 	}
+
+	bro := broker.Broker{}
+	bro.GetClusterMetadata()
 
 	for _, topic := range r.Body.Topics.Values {
 		// Create a new partition for each topic

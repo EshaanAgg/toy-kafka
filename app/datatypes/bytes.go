@@ -6,8 +6,8 @@ import (
 )
 
 type CompactNullableBytes []byte
+type VarIntBytes []byte
 
-// First the length N+1 is given as an UNSIGNED_VARINT.Then N bytes follow. A null object is represented with a length of 0.
 func (c *CompactNullableBytes) Unmarshal(p *Parser) error {
 	var length VarUInt
 	if err := length.Unmarshal(p); err != nil {
@@ -38,5 +38,48 @@ func (c CompactNullableBytes) Marshal(b *bytes.Buffer) error {
 	if _, err := b.Write(c); err != nil {
 		return fmt.Errorf("compact_nullable_bytes: unable to write %d bytes: %w", len(c), err)
 	}
+	return nil
+}
+
+func (v *VarIntBytes) Unmarshal(p *Parser) error {
+	var l VarInt
+	if err := l.Unmarshal(p); err != nil {
+		return fmt.Errorf("varint_bytes.length: %w", err)
+	}
+
+	// Null bytes
+	if l < 0 {
+		*v = nil
+		return nil
+	}
+
+	// Empty bytes
+	if l == 0 {
+		*v = []byte{}
+		return nil
+	}
+
+	// Non-empty bytes
+	bytes := p.getNextBytes(int(l))
+	if bytes == nil {
+		return fmt.Errorf("varint_bytes: unable to read %d bytes", l)
+	}
+	*v = bytes
+
+	return nil
+}
+
+func (v VarIntBytes) Marshal(b *bytes.Buffer) error {
+	if v == nil {
+		return VarInt(-1).Marshal(b)
+	}
+
+	if err := VarInt(len(v)).Marshal(b); err != nil {
+		return fmt.Errorf("varint_bytes.length: %w", err)
+	}
+	if _, err := b.Write(v); err != nil {
+		return fmt.Errorf("varint_bytes: unable to write %d bytes: %w", len(v), err)
+	}
+
 	return nil
 }
