@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"fmt"
+
+	"github.com/EshaanAgg/toy-kafka/app/broker"
 	"github.com/EshaanAgg/toy-kafka/app/datatypes"
 	"github.com/EshaanAgg/toy-kafka/app/datatypes/protocol"
 	"github.com/EshaanAgg/toy-kafka/app/handlers/errorcodes"
@@ -30,7 +33,16 @@ type DescribeTopicPartitionsV0Body struct {
 }
 
 type DescribeTopicPartitionsV0Response_Partition struct {
-	// TODO: Add appropriate types for the fields
+	ErrorCode              datatypes.Int16
+	PartitionIndex         datatypes.Int32
+	LeaderID               datatypes.Int32
+	LeaderEpoch            datatypes.Int32
+	ReplicaNodes           datatypes.CompactArray[datatypes.Int32]
+	ISRNodes               datatypes.CompactArray[datatypes.Int32]
+	EligibleLeaderReplicas datatypes.CompactArray[datatypes.Int32]
+	LastKnownELR           datatypes.CompactArray[datatypes.Int32]
+	OfflineReplicas        datatypes.CompactArray[datatypes.Int32]
+	TaggedFields           datatypes.TaggedFields
 }
 
 type DescribeTopicPartitionsV0Response_Topic struct {
@@ -68,8 +80,13 @@ func (r *DescribeTopicPartitionsV0Request) Handle() ([]byte, error) {
 		NextCursor:     datatypes.NewNullable[DescribeTopicPartitions_Cursor](),
 	}
 
+	broker, err := broker.NewBroker()
+	if err != nil {
+		return nil, fmt.Errorf("unable to create broker: %w", err)
+	}
+
 	for _, topic := range r.Body.Topics.Values {
-		body.Topics.Append(getDescribeTopicPartitionsV0ResponseTopic(topic))
+		body.Topics.Append(getDescribeTopicPartitionsV0ResponseTopic(topic, broker))
 	}
 
 	header := &protocol.HeaderV1{
@@ -79,9 +96,31 @@ func (r *DescribeTopicPartitionsV0Request) Handle() ([]byte, error) {
 	return protocol.NewResponse(header, body).Bytes()
 }
 
-func getDescribeTopicPartitionsV0ResponseTopic(topic DescribeTopicPartitionsV0Request_Topic) *DescribeTopicPartitionsV0Response_Topic {
-	return &DescribeTopicPartitionsV0Response_Topic{
-		ErrorCode: errorcodes.UNKNOWN_TOPIC_OR_PARTITION,
+func getDescribeTopicPartitionsV0ResponseTopic(
+	topic DescribeTopicPartitionsV0Request_Topic,
+	broker *broker.Broker,
+) *DescribeTopicPartitionsV0Response_Topic {
+	response := &DescribeTopicPartitionsV0Response_Topic{
 		TopicName: topic.Name,
+		ErrorCode: errorcodes.NO_ERROR,
 	}
+
+	topicID, ok := broker.TopicIDFromName[string(topic.Name)]
+	if !ok {
+		response.ErrorCode = errorcodes.UNKNOWN_TOPIC_OR_PARTITION
+		return response
+	}
+
+	response.TopicID = topicID
+
+	partitionIndexes := broker.TopicPartitions[string(topic.Name)]
+	for _, partitionIndex := range partitionIndexes {
+		p := &DescribeTopicPartitionsV0Response_Partition{
+			PartitionIndex: datatypes.Int32(partitionIndex),
+			ErrorCode:      errorcodes.NO_ERROR,
+		}
+		response.Partitions.Append(p)
+	}
+
+	return response
 }

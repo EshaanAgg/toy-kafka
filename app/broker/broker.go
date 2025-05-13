@@ -13,12 +13,14 @@ const CLUSTER_METADATA_FILE = LOG_BASE_DIR + "/__cluster_metadata-0/000000000000
 
 type Broker struct {
 	TopicNameFromID map[datatypes.UUID]string
+	TopicIDFromName map[string]datatypes.UUID
 	TopicPartitions map[string][]int
 }
 
 func NewBroker() (*Broker, error) {
 	b := &Broker{
 		TopicNameFromID: make(map[datatypes.UUID]string),
+		TopicIDFromName: make(map[string]datatypes.UUID),
 		TopicPartitions: make(map[string][]int),
 	}
 	// If the cluster metadata file does not exist, return an empty broker
@@ -83,6 +85,7 @@ func (b *Broker) processBatch(batch *RecordBatch) error {
 func (b *Broker) processTopicValue(topicValue *TopicValue) {
 	// Store the topic name in the map using the UUID as the key
 	b.TopicNameFromID[topicValue.ID] = string(topicValue.Name)
+	b.TopicIDFromName[string(topicValue.Name)] = topicValue.ID
 }
 
 func (b *Broker) processPartitionValue(partitionValue *PartitionValue) {
