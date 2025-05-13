@@ -9,6 +9,7 @@ import (
 type TaggedFields int
 type UUID [16]byte
 type CompactRecords = VarIntBytes
+type Boolean bool
 
 func (t *TaggedFields) Unmarshal(p *Parser) error {
 	var tagLen VarUInt = 0
@@ -47,4 +48,24 @@ func (u UUID) Marshal(b *bytes.Buffer) error {
 		}
 	}
 	return nil
+}
+
+func (b *Boolean) Unmarshal(p *Parser) error {
+	bit := p.getNextBytes(1)
+	if bit == nil {
+		return errors.New("boolean: unable to read 1 byte")
+	}
+	if bit[0] == 0 {
+		*b = false
+	} else {
+		*b = true
+	}
+	return nil
+}
+
+func (b Boolean) Marshal(buffer *bytes.Buffer) error {
+	if b {
+		return buffer.WriteByte(1)
+	}
+	return buffer.WriteByte(0)
 }

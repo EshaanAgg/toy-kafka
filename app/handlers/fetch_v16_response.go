@@ -7,6 +7,7 @@ import (
 	"github.com/EshaanAgg/toy-kafka/app/broker"
 	"github.com/EshaanAgg/toy-kafka/app/datatypes"
 	"github.com/EshaanAgg/toy-kafka/app/datatypes/protocol"
+	"github.com/EshaanAgg/toy-kafka/app/handlers/errorcodes"
 )
 
 type FetchV16Request_AbortedTransaction struct {
@@ -48,7 +49,7 @@ func (r *FetchV16Request) Handle() ([]byte, error) {
 
 	resBody := &FetchV16Response{
 		ThrottleTimeMS: 0,
-		ErrorCode:      NO_ERROR_CODE,
+		ErrorCode:      errorcodes.NO_ERROR,
 		SessionID:      0,
 	}
 
@@ -76,7 +77,7 @@ func getResponseForTopic(topic *FetchV16_Topic, broker *broker.Broker) *FetchV16
 		// Topic not found, so create a parition with UNKNOWN_TOPIC_ID
 		partition := &FetchV16Response_Partition{
 			Index:     0,
-			ErrorCode: UNKNOWN_TOPIC_ID_ERROR_CODE,
+			ErrorCode: errorcodes.UNKNOWN_TOPIC_ID,
 		}
 		response.Partitions.Append(partition)
 		return response
@@ -91,14 +92,14 @@ func getResponseForTopic(topic *FetchV16_Topic, broker *broker.Broker) *FetchV16
 	for _, requestedPartition := range topic.Partitions.Values {
 		partition := &FetchV16Response_Partition{
 			Index:     requestedPartition.Partition,
-			ErrorCode: NO_ERROR_CODE,
+			ErrorCode: errorcodes.NO_ERROR,
 		}
 		partitionIdx := int(requestedPartition.Partition)
 		existsOnDisk := slices.Contains(onDiskPartitions, partitionIdx)
 
 		if !existsOnDisk {
 			// Update the error code to indicate that the partition does not exist
-			partition.ErrorCode = UNKNOWN_TOPIC_OR_PARTITION_ERROR_CODE
+			partition.ErrorCode = errorcodes.UNKNOWN_TOPIC_OR_PARTITION
 		} else {
 			// Fetch the partition data from the broker
 			partitionData, err := broker.GetTopicPartitionData(name, partitionIdx)

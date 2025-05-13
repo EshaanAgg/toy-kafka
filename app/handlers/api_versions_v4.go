@@ -3,6 +3,7 @@ package handlers
 import (
 	"github.com/EshaanAgg/toy-kafka/app/datatypes"
 	"github.com/EshaanAgg/toy-kafka/app/datatypes/protocol"
+	"github.com/EshaanAgg/toy-kafka/app/handlers/errorcodes"
 )
 
 type APIVersionsV4Request struct {
@@ -30,7 +31,7 @@ func NewAPIVersionsV4Request(r *protocol.RequestHeader) (protocol.Request, error
 func (r *APIVersionsV4Request) getErrorCode() datatypes.Int16 {
 	api := RequestKeyMap[r.APIKey]
 	if api.MinVersion > int16(r.APIVersion) || api.MaxVersion < int16(r.APIVersion) {
-		return UNSUPPORTED_API_VERSION_ERROR_CODE
+		return errorcodes.UNSUPPORTED_API_VERSION
 	}
 	return 0
 }

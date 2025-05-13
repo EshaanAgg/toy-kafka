@@ -1,0 +1,6 @@
+package errorcodes
+
+const NO_ERROR = 0
+const UNKNOWN_TOPIC_OR_PARTITION = 3
+const UNSUPPORTED_API_VERSION = 35
+const UNKNOWN_TOPIC_ID = 100
